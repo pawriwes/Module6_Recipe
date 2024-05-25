@@ -17,10 +17,6 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         favoriteRecipes = repository.favoriteRecipes
     }
 
-    fun insert(recipe: Recipe) = viewModelScope.launch {
-        repository.insert(recipe)
-    }
-
     fun delete(recipe: Recipe) = viewModelScope.launch {
         repository.delete(recipe)
     }

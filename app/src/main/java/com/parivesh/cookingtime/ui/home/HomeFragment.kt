@@ -19,7 +19,6 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        homeViewModel.fetchRecipes()
     }
 
     override fun onCreateView(
@@ -38,5 +37,9 @@ class HomeFragment : Fragment() {
         })
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 }

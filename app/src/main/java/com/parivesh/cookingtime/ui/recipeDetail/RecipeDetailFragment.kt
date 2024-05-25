@@ -51,13 +51,15 @@ class RecipeDetailFragment : Fragment() {
 
         viewModel.recipe.observe(viewLifecycleOwner, Observer { recipe ->
             recipe?.let {
+                Log.d("RecipeDetailFragment", "Displaying recipe: $recipe")
                 Glide.with(this)
                     .load(recipe.strMealThumb)
                     .into(imgRecipeThumb)
                 tvRecipeTitle.text = recipe.strMeal
                 tvRecipeCategory.text = recipe.strCategory
                 tvRecipeInstructions.text = recipe.strInstructions
-                Log.d("RecipeDetailFragment", "Recipe details displayed: $recipe")
+            } ?: run {
+                Log.e("RecipeDetailFragment", "Recipe is null")
             }
         })
     }

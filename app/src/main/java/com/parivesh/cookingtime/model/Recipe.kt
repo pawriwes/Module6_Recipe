@@ -58,5 +58,6 @@ data class Recipe(
     val strImageSource: String? = null,
     val strCreativeCommonsConfirmed: String? = null,
     val dateModified: String? = null,
-    var isFavorite: Boolean = false
+    var isFavorite: Boolean = false,
+    var storeLocally: Boolean = false
 )

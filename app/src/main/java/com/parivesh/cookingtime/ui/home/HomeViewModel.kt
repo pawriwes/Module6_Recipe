@@ -27,21 +27,33 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         val recipeDao = RecipeDatabase.getDatabase(application).recipeDao()
         repository = FavoritesRepository(recipeDao)
         requestQueue = Volley.newRequestQueue(application)
+        fetchRecipes() // Fetch recipes initially when the ViewModel is created
     }
 
     fun fetchRecipes() {
-        val url = "https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood"
-        val jsonObjectRequest = JsonObjectRequest(
-            Request.Method.GET, url, null,
-            { response ->
-                val recipesList = parseRecipes(response)
-                _recipes.value = recipesList
-            },
-            { error ->
-                // Handle error
-            }
-        )
-        requestQueue.add(jsonObjectRequest)
+        if (_recipes.value.isNullOrEmpty()) {
+            val url = "https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood"
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.GET, url, null,
+                { response ->
+                    val recipesList = parseRecipes(response)
+                    viewModelScope.launch {
+                        // Observe favorite recipes from Room database
+                        repository.favoriteRecipes.observeForever { favoriteRecipes ->
+                            val updatedRecipesList = recipesList.map { recipe ->
+                                recipe.isFavorite = favoriteRecipes.any { it.idMeal == recipe.idMeal }
+                                recipe
+                            }
+                            _recipes.value = updatedRecipesList
+                        }
+                    }
+                },
+                { error ->
+                    // Handle error
+                }
+            )
+            requestQueue.add(jsonObjectRequest)
+        }
     }
 
     private fun parseRecipes(response: JSONObject): List<Recipe> {

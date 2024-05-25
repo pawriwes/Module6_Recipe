@@ -5,13 +5,18 @@ import com.parivesh.cookingtime.model.Recipe
 import com.parivesh.cookingtime.model.RecipeDao
 
 class FavoritesRepository(private val recipeDao: RecipeDao) {
-    val favoriteRecipes: LiveData<List<Recipe>> = recipeDao.getFavoriteRecipes()
+
+    val favoriteRecipes: LiveData<List<Recipe>> = recipeDao.getAllFavorites()
 
     suspend fun insert(recipe: Recipe) {
-        recipeDao.insertRecipe(recipe)
+        recipeDao.insert(recipe)
     }
 
     suspend fun delete(recipe: Recipe) {
-        recipeDao.deleteRecipe(recipe)
+        recipeDao.delete(recipe)
+    }
+
+    suspend fun getRecipeById(idMeal: String): Recipe? {
+        return recipeDao.getRecipeById(idMeal)
     }
 }
