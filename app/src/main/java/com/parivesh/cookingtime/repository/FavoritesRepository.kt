@@ -16,6 +16,10 @@ class FavoritesRepository(private val recipeDao: RecipeDao) {
         recipeDao.delete(recipe)
     }
 
+    suspend fun deleteAllRecipes() {
+        recipeDao.deleteAllRecipes()
+    }
+
     suspend fun getRecipeById(idMeal: String): Recipe? {
         return recipeDao.getRecipeById(idMeal)
     }

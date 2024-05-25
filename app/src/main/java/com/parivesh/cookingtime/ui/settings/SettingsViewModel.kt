@@ -1,13 +1,21 @@
 package com.parivesh.cookingtime.ui.settings
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.parivesh.cookingtime.model.RecipeDatabase
+import com.parivesh.cookingtime.repository.FavoritesRepository
+import kotlinx.coroutines.launch
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository: FavoritesRepository
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "Welcome to Settings"
+    init {
+        val recipeDao = RecipeDatabase.getDatabase(application).recipeDao()
+        repository = FavoritesRepository(recipeDao)
     }
-    val text: LiveData<String> = _text
+
+    fun deleteAllRecipes() = viewModelScope.launch {
+        repository.deleteAllRecipes()
+    }
 }
