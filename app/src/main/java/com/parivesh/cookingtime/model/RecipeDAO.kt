@@ -11,7 +11,7 @@ interface RecipeDao {
     @Delete
     suspend fun delete(recipe: Recipe)
 
-    @Query("SELECT * FROM recipes")
+    @Query("SELECT * FROM recipes WHERE isFavorite = 1")
     fun getAllFavorites(): LiveData<List<Recipe>>
 
     @Query("DELETE FROM recipes")
