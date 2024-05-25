@@ -18,6 +18,7 @@ roomCoroutines = "2.1.0-alpha04"
 glide = "5.0.0-rc01"
 gson = "2.11.0"
 volley = "1.2.1"
+navigationSafeArgsGradlePlugin = "2.7.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ androidx-room-coroutines = { group = "androidx.room", name = "room-coroutines", 
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+androidx-navigation-safe-args-gradle-plugin = { group = "androidx.navigation", name = "navigation-safe-args-gradle-plugin", version.ref = "navigationSafeArgsGradlePlugin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

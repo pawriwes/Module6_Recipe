@@ -4,43 +4,63 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.android.volley.toolbox.JsonArrayRequest
+import androidx.lifecycle.viewModelScope
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
-import com.parivesh.cookingtime.Model.Recipe
-import org.json.JSONException
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.google.gson.reflect.TypeToken
+import com.parivesh.cookingtime.model.Recipe
+import com.parivesh.cookingtime.model.RecipeDatabase
+import com.parivesh.cookingtime.repository.FavoritesRepository
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    private val recipesLiveData = MutableLiveData<List<Recipe>>()
+    private val _recipes = MutableLiveData<List<Recipe>>()
+    val recipes: LiveData<List<Recipe>> = _recipes
+
+    private val repository: FavoritesRepository
+    private val requestQueue: RequestQueue
 
     init {
-        fetchRecipes()
+        val recipeDao = RecipeDatabase.getDatabase(application).recipeDao()
+        repository = FavoritesRepository(recipeDao)
+        requestQueue = Volley.newRequestQueue(application)
     }
 
-    fun getRecipes(): LiveData<List<Recipe>> {
-        return recipesLiveData
-    }
-
-    private fun fetchRecipes() {
-        val queue = Volley.newRequestQueue(getApplication<Application>().applicationContext)
+    fun fetchRecipes() {
         val url = "https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood"
-
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET, url, null,
             { response ->
-                val mealsArray = response.getJSONArray("meals")
-                val gson = Gson()
-                val listType = object : TypeToken<List<Recipe>>() {}.type
-                val recipes: List<Recipe> = gson.fromJson(mealsArray.toString(), listType)
-                recipesLiveData.value = recipes
+                val recipesList = parseRecipes(response)
+                _recipes.value = recipesList
             },
             { error ->
                 // Handle error
-            })
+            }
+        )
+        requestQueue.add(jsonObjectRequest)
+    }
 
-        queue.add(jsonObjectRequest)
+    private fun parseRecipes(response: JSONObject): List<Recipe> {
+        val mealsArray = response.getJSONArray("meals")
+        val gson = Gson()
+        val recipes = mutableListOf<Recipe>()
+        for (i in 0 until mealsArray.length()) {
+            val mealObject = mealsArray.getJSONObject(i)
+            val recipe = gson.fromJson(mealObject.toString(), Recipe::class.java)
+            recipes.add(recipe)
+        }
+        return recipes
+    }
+
+    fun insert(recipe: Recipe) = viewModelScope.launch {
+        repository.insert(recipe)
+    }
+
+    fun delete(recipe: Recipe) = viewModelScope.launch {
+        repository.delete(recipe)
     }
 }

@@ -1,4 +1,4 @@
-package com.parivesh.cookingtime.Model
+package com.parivesh.cookingtime.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -4,44 +4,56 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.parivesh.cookingtime.Model.Recipe
 import com.parivesh.cookingtime.R
+import com.parivesh.cookingtime.model.Recipe
 
 class FavoritesFragment : Fragment() {
 
+    private lateinit var viewModel: FavoritesViewModel
     private lateinit var adapter: FavoritesAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var tvNoFavorites: TextView
     private val favoriteRecipes = mutableListOf<Recipe>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_favorites, container, false)
+        val view = inflater.inflate(R.layout.fragment_favorites, container, false)
+        recyclerView = view.findViewById(R.id.recyclerViewFavorites)
+        tvNoFavorites = view.findViewById(R.id.tvNoFavorites)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Add 10 items to the list for demonstration purposes
-        repeat(10) {
-            favoriteRecipes.add(
-                Recipe(
-                    idMeal = "52767",
-                    strMeal = "Teriyaki Chicken Casserole",
-                    strMealThumb = "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg",
-                    isFavorite = true
-                )
-            )
+        adapter = FavoritesAdapter(favoriteRecipes) { recipe ->
+            viewModel.delete(recipe)
         }
 
-        adapter = FavoritesAdapter(favoriteRecipes)
-
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerViewFavorites)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        viewModel = ViewModelProvider(this).get(FavoritesViewModel::class.java)
+        viewModel.favoriteRecipes.observe(viewLifecycleOwner, Observer { recipes ->
+            favoriteRecipes.clear()
+            favoriteRecipes.addAll(recipes)
+            adapter.notifyDataSetChanged()
+
+            if (recipes.isEmpty()) {
+                recyclerView.visibility = View.GONE
+                tvNoFavorites.visibility = View.VISIBLE
+            } else {
+                recyclerView.visibility = View.VISIBLE
+                tvNoFavorites.visibility = View.GONE
+            }
+        })
     }
 }
-

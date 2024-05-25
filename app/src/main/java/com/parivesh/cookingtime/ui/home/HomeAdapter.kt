@@ -1,19 +1,21 @@
 package com.parivesh.cookingtime.ui.home
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.parivesh.cookingtime.Model.Recipe
 import com.parivesh.cookingtime.R
+import com.parivesh.cookingtime.model.Recipe
 
 class HomeAdapter(
-    private val recipes: List<Recipe>,
-    private val onItemClick: (Recipe) -> Unit
+    private var recipes: List<Recipe>,
+    private val viewModel: HomeViewModel
 ) : RecyclerView.Adapter<HomeAdapter.RecipeViewHolder>() {
 
     inner class RecipeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -22,7 +24,6 @@ class HomeAdapter(
         private val btnFavorite: ImageButton = itemView.findViewById(R.id.btnFavorite)
 
         fun bind(recipe: Recipe) {
-            // Bind data to views programmatically
             Glide.with(imgThumbnail.context)
                 .load(recipe.strMealThumb)
                 .placeholder(R.drawable.baseline_3p_24)
@@ -30,19 +31,24 @@ class HomeAdapter(
 
             tvTitle.text = recipe.strMeal
 
-            // Set favorite button state
             btnFavorite.setImageResource(
-                if (recipe.isFavorite) R.drawable.baseline_favorite_24
-                else R.drawable.baseline_favorite_border_24
+                if (recipe.isFavorite) R.drawable.baseline_favorite_24 else R.drawable.baseline_favorite_border
             )
 
             btnFavorite.setOnClickListener {
                 recipe.isFavorite = !recipe.isFavorite
-                changeFavorite(recipe)
+                if (recipe.isFavorite) {
+                    viewModel.insert(recipe)
+                } else {
+                    viewModel.delete(recipe)
+                }
+                notifyItemChanged(adapterPosition)
             }
 
             itemView.setOnClickListener {
-                onItemClick(recipe)
+                val bundle = Bundle()
+                bundle.putString("recipeId", recipe.idMeal)
+                it.findNavController().navigate(R.id.action_homeFragment_to_recipeDetailFragment, bundle)
             }
         }
     }
@@ -59,10 +65,8 @@ class HomeAdapter(
 
     override fun getItemCount() = recipes.size
 
-    private fun changeFavorite(recipe: Recipe) {
-        val position = recipes.indexOf(recipe)
-        if (position != -1) {
-            notifyItemChanged(position)
-        }
+    fun updateRecipes(newRecipes: List<Recipe>) {
+        recipes = newRecipes
+        notifyDataSetChanged()
     }
 }

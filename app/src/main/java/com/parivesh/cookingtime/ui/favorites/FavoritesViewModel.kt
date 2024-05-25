@@ -1,13 +1,27 @@
 package com.parivesh.cookingtime.ui.favorites
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
+import com.parivesh.cookingtime.model.Recipe
+import com.parivesh.cookingtime.model.RecipeDatabase
+import com.parivesh.cookingtime.repository.FavoritesRepository
+import kotlinx.coroutines.launch
 
-class FavoritesViewModel : ViewModel() {
+class FavoritesViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository: FavoritesRepository
+    val favoriteRecipes: LiveData<List<Recipe>>
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "Welcome to Favorites"
+    init {
+        val recipeDao = RecipeDatabase.getDatabase(application).recipeDao()
+        repository = FavoritesRepository(recipeDao)
+        favoriteRecipes = repository.favoriteRecipes
     }
-    val text: LiveData<String> = _text
+
+    fun insert(recipe: Recipe) = viewModelScope.launch {
+        repository.insert(recipe)
+    }
+
+    fun delete(recipe: Recipe) = viewModelScope.launch {
+        repository.delete(recipe)
+    }
 }

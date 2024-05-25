@@ -9,5 +9,6 @@
     <string name="favorite">favorite</string>
     <string name="recipe_thumbnail" />
     <string name="recipe_image">Recipe Image</string>
+    <string name="there_are_no_favorite_recipes">There are no favorite recipes</string>
     "
 </resources>
